@@ -22,9 +22,12 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  // 🔒 Get password from environment variables
   const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'gupta2026';
-  const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
+const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
+
+// ADD THIS DEBUG LINE
+console.log('API Key loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
+console.log('Admin Password loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
 
   // Check if already logged in
   useEffect(() => {
