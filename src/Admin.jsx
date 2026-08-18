@@ -4,9 +4,24 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [properties, setProperties] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    title: '',
+    type: 'plot',
+    location: '',
+    size: '',
+    price: '',
+    image: '',
+    description: '',
+    featured: false,
+    available: true,
+    dateAdded: new Date().toISOString().split('T')[0]
+  });
 
-  // Admin credentials - CHANGE THESE!
-  const ADMIN_PASSWORD = '197324';
+  const ADMIN_PASSWORD = 'gupta2026';
 
   // Check if already logged in
   useEffect(() => {
@@ -14,7 +29,61 @@ export default function Admin() {
     if (loggedIn === 'true') {
       setIsAuthenticated(true);
     }
+    setLoading(false);
   }, []);
+
+  // Load properties from localStorage
+  useEffect(() => {
+    if (isAuthenticated) {
+      const saved = localStorage.getItem('guptaProperties');
+      if (saved) {
+        try {
+          setProperties(JSON.parse(saved));
+        } catch (e) {
+          setProperties([]);
+        }
+      } else {
+        // Default properties
+        const defaults = [
+          {
+            id: 1,
+            type: 'plot',
+            title: 'Prime Residential Plot',
+            location: 'Kurnool City Center',
+            size: '1200 sq.ft',
+            price: '₹45 Lakhs',
+            image: 'https://via.placeholder.com/400x300?text=Plot+1',
+            description: 'Excellent residential plot in prime location.',
+            featured: true,
+            available: true,
+            dateAdded: '2026-07-20'
+          },
+          {
+            id: 2,
+            type: 'land',
+            title: 'Agricultural Land',
+            location: 'Nandyal Highway Road',
+            size: '2 Acres',
+            price: '₹1.2 Crores',
+            image: 'https://via.placeholder.com/400x300?text=Land+1',
+            description: 'Fertile agricultural land with water supply.',
+            featured: false,
+            available: true,
+            dateAdded: '2026-07-18'
+          }
+        ];
+        setProperties(defaults);
+        localStorage.setItem('guptaProperties', JSON.stringify(defaults));
+      }
+    }
+  }, [isAuthenticated]);
+
+  // Save to localStorage whenever properties change
+  useEffect(() => {
+    if (isAuthenticated && properties.length > 0) {
+      localStorage.setItem('guptaProperties', JSON.stringify(properties));
+    }
+  }, [properties, isAuthenticated]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -33,118 +102,14 @@ export default function Admin() {
     setIsAuthenticated(false);
     localStorage.removeItem('adminLoggedIn');
     setPassword('');
+    setProperties([]);
   };
 
-  // ============================================
-  // LOGIN SCREEN (Shown when not authenticated)
-  // ============================================
-  if (!isAuthenticated) {
-    return (
-      <div style={styles.loginContainer}>
-        <div style={styles.loginBox}>
-          <div style={styles.loginHeader}>
-            <span style={styles.loginIcon}>🔒</span>
-            <h2 style={styles.loginTitle}>Admin Login</h2>
-            <p style={styles.loginSubtitle}>Enter your password to access the admin panel</p>
-          </div>
-
-          <form onSubmit={handleLogin} style={styles.loginForm}>
-            <div style={styles.loginInputGroup}>
-              <label style={styles.loginLabel}>Password</label>
-              <input
-                type="password"
-                placeholder="Enter admin password..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={styles.loginInput}
-                autoFocus
-              />
-            </div>
-
-            {loginError && <p style={styles.loginError}>{loginError}</p>}
-
-            <button type="submit" style={styles.loginBtn}>
-              🔓 Login to Admin
-            </button>
-
-            <p style={styles.loginHint}>
-              💡 Default password: <strong>gupta2026</strong>
-              <br />
-              <span style={styles.loginHintSmall}>(Contact admin for password)</span>
-            </p>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================
-  // ADMIN PANEL (Only visible after login)
-  // ============================================
-  
-  const [properties, setProperties] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    type: 'plot',
-    location: '',
-    size: '',
-    price: '',
-    image: '',
-    description: '',
-    featured: false,
-    available: true,
-    dateAdded: new Date().toISOString().split('T')[0]
-  });
-
-  // Load properties from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('guptaProperties');
-    if (saved) {
-      setProperties(JSON.parse(saved));
-    } else {
-      const defaults = [
-        {
-          id: 1,
-          type: 'plot',
-          title: 'Prime Residential Plot',
-          location: 'Kurnool City Center',
-          size: '1200 sq.ft',
-          price: '₹45 Lakhs',
-          image: 'https://via.placeholder.com/400x300?text=Plot+1',
-          description: 'Excellent residential plot in prime location.',
-          featured: true,
-          available: true,
-          dateAdded: '2026-07-20'
-        },
-        {
-          id: 2,
-          type: 'land',
-          title: 'Agricultural Land',
-          location: 'Nandyal Highway Road',
-          size: '2 Acres',
-          price: '₹1.2 Crores',
-          image: 'https://via.placeholder.com/400x300?text=Land+1',
-          description: 'Fertile agricultural land with water supply.',
-          featured: false,
-          available: true,
-          dateAdded: '2026-07-18'
-        }
-      ];
-      setProperties(defaults);
-      localStorage.setItem('guptaProperties', JSON.stringify(defaults));
-    }
-  }, []);
-
-  // Save to localStorage whenever properties change
-  useEffect(() => {
-    if (properties.length > 0) {
-      localStorage.setItem('guptaProperties', JSON.stringify(properties));
-    }
-  }, [properties]);
-
   const handleAdd = () => {
+    if (!formData.title || !formData.location || !formData.size || !formData.price) {
+      alert('Please fill in all required fields (Title, Location, Size, Price)');
+      return;
+    }
     const newProperty = {
       id: Date.now(),
       ...formData
@@ -167,12 +132,18 @@ export default function Admin() {
 
   const handleEdit = (id) => {
     const property = properties.find(p => p.id === id);
-    setFormData(property);
-    setEditingId(id);
-    setShowForm(true);
+    if (property) {
+      setFormData(property);
+      setEditingId(id);
+      setShowForm(true);
+    }
   };
 
   const handleUpdate = () => {
+    if (!formData.title || !formData.location || !formData.size || !formData.price) {
+      alert('Please fill in all required fields (Title, Location, Size, Price)');
+      return;
+    }
     setProperties(properties.map(p => 
       p.id === editingId ? { ...formData, id: editingId } : p
     ));
@@ -199,13 +170,19 @@ export default function Admin() {
   };
 
   const handleExport = () => {
+    if (properties.length === 0) {
+      alert('No properties to export.');
+      return;
+    }
     const dataStr = JSON.stringify(properties, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `properties-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
@@ -248,9 +225,58 @@ export default function Admin() {
     return colors[type] || '#1e3a5f';
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <p>Loading admin panel...</p>
+      </div>
+    );
+  }
+
+  // Login Screen
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginBox}>
+          <div style={styles.loginHeader}>
+            <span style={styles.loginIcon}>🔒</span>
+            <h2 style={styles.loginTitle}>Admin Login</h2>
+            <p style={styles.loginSubtitle}>Enter your password to access the admin panel</p>
+          </div>
+
+          <form onSubmit={handleLogin} style={styles.loginForm}>
+            <div style={styles.loginInputGroup}>
+              <label style={styles.loginLabel}>Password</label>
+              <input
+                type="password"
+                placeholder="Enter admin password..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={styles.loginInput}
+                autoFocus
+              />
+            </div>
+
+            {loginError && <p style={styles.loginError}>{loginError}</p>}
+
+            <button type="submit" style={styles.loginBtn}>
+              🔓 Login to Admin
+            </button>
+
+            <p style={styles.loginHint}>
+              💡 Default password: <strong>gupta2026</strong>
+            </p>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Panel
   return (
     <div style={styles.adminPanel}>
-      {/* Admin Header with Logout */}
+      {/* Admin Header */}
       <div style={styles.adminHeader}>
         <div style={styles.adminTitleSection}>
           <h1 style={styles.adminTitle}>🏠 Property Admin Panel</h1>
@@ -261,7 +287,7 @@ export default function Admin() {
         </button>
       </div>
 
-      {/* Stats Bar */}
+      {/* Stats */}
       <div style={styles.stats}>
         <div style={styles.statCard}>
           <h3 style={styles.statNumber}>{properties.length}</h3>
@@ -299,7 +325,7 @@ export default function Admin() {
         </button>
       </div>
 
-      {/* Add/Edit Form Modal */}
+      {/* Form Modal */}
       {showForm && (
         <div style={styles.formOverlay} onClick={() => {
           if (window.confirm('⚠️ Are you sure you want to close? Unsaved changes will be lost.')) {
@@ -323,22 +349,20 @@ export default function Admin() {
             <div style={styles.formHeader}>
               <h2 style={styles.formTitle}>{editingId ? '✏️ Edit Property' : '➕ Add New Property'}</h2>
               <button onClick={() => {
-                if (window.confirm('⚠️ Are you sure you want to close? Unsaved changes will be lost.')) {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setFormData({
-                    title: '',
-                    type: 'plot',
-                    location: '',
-                    size: '',
-                    price: '',
-                    image: '',
-                    description: '',
-                    featured: false,
-                    available: true,
-                    dateAdded: new Date().toISOString().split('T')[0]
-                  });
-                }
+                setShowForm(false);
+                setEditingId(null);
+                setFormData({
+                  title: '',
+                  type: 'plot',
+                  location: '',
+                  size: '',
+                  price: '',
+                  image: '',
+                  description: '',
+                  featured: false,
+                  available: true,
+                  dateAdded: new Date().toISOString().split('T')[0]
+                });
               }} style={styles.closeBtn}>✕</button>
             </div>
             
@@ -457,7 +481,7 @@ export default function Admin() {
                   checked={formData.featured}
                   onChange={(e) => setFormData({...formData, featured: e.target.checked})}
                 />
-                ⭐ Featured Property (shows with a star badge)
+                ⭐ Featured Property
               </label>
             </div>
 
@@ -546,6 +570,15 @@ export default function Admin() {
 // ============ STYLES ============
 
 const styles = {
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '200px',
+    color: '#666',
+    fontSize: '18px',
+  },
+
   // Login Styles
   loginContainer: {
     display: 'flex',
@@ -626,10 +659,6 @@ const styles = {
     fontSize: '13px',
     color: '#999',
     marginTop: '10px',
-  },
-  loginHintSmall: {
-    fontSize: '11px',
-    color: '#bbb',
   },
 
   // Admin Panel Styles
@@ -891,23 +920,26 @@ const styles = {
     background: '#3498db',
     color: 'white',
     border: 'none',
-    padding: '5px 10px',
+    padding: '5px 12px',
     borderRadius: '5px',
     cursor: 'pointer',
     marginRight: '5px',
+    fontSize: '14px',
   },
   deleteBtn: {
     background: '#e74c3c',
     color: 'white',
     border: 'none',
-    padding: '5px 10px',
+    padding: '5px 12px',
     borderRadius: '5px',
     cursor: 'pointer',
+    fontSize: '14px',
   },
   emptyState: {
     textAlign: 'center',
     padding: '40px',
     color: '#999',
+    fontSize: '16px',
   },
   footer: {
     marginTop: '20px',
