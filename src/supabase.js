@@ -1,16 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use VITE_ prefixed variables (Vite requires this prefix for client-side env vars)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Use VITE_ prefixed variables for Vite
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 
+                    import.meta.env.NEXT_PUBLIC_SUPABASE_URL || 
+                    '';
 
-console.log('🔗🔗🔗 SUPABASE URL:', supabaseUrl);
-console.log('🔑🔗🔗 SUPABASE KEY:', supabaseKey ? '✅ Yes (length: ' + supabaseKey.length + ')' : '❌ No');
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 
+                    import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
+                    '';
+
+console.log('🔗 Supabase URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+console.log('🔑 Supabase Key:', supabaseKey ? '✅ Set (length: ' + supabaseKey.length + ')' : '❌ Missing');
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('❌❌❌ SUPABASE NOT CONFIGURED! Please add environment variables.');
-} else {
-  console.log('✅✅✅ SUPABASE CONNECTED!');
+  console.error('❌ Supabase environment variables are missing!');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
