@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Properties from './Properties';
+import Admin from './Admin';
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function App() {
             <a href="#services" style={styles.navLink}>Services</a>
             <a href="#properties" style={styles.navLink}>Properties</a>
             <a href="#testimonials" style={styles.navLink}>Testimonials</a>
+            <a href="#admin" style={styles.adminNav}>🔒 Admin</a>
             <a href="#contact" style={styles.contactNav}>Contact</a>
           </div>
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={styles.menuBtn}>
@@ -42,6 +44,7 @@ export default function App() {
             <a href="#services" style={styles.mobileLink}>Services</a>
             <a href="#properties" style={styles.mobileLink}>Properties</a>
             <a href="#testimonials" style={styles.mobileLink}>Testimonials</a>
+            <a href="#admin" style={styles.mobileAdmin}>🔒 Admin</a>
             <a href="#contact" style={styles.mobileContact}>Contact</a>
           </div>
         )}
@@ -230,6 +233,11 @@ export default function App() {
         </div>
       </section>
 
+      {/* ADMIN PANEL */}
+      <section id="admin" style={styles.adminSection}>
+        <Admin />
+      </section>
+
       {/* CONTACT SECTION */}
       <section id="contact" style={styles.contactSection}>
         <div style={styles.contactContainer}>
@@ -277,6 +285,7 @@ export default function App() {
             <a href="#services" style={styles.footerLink}>Services</a>
             <a href="#properties" style={styles.footerLink}>Properties</a>
             <a href="#testimonials" style={styles.footerLink}>Testimonials</a>
+            <a href="#admin" style={styles.footerLink}>Admin</a>
             <a href="#contact" style={styles.footerLink}>Contact</a>
           </div>
           <div style={styles.footerCol}>
@@ -378,13 +387,19 @@ const styles = {
   },
   navLinks: {
     display: 'flex',
-    gap: '30px',
+    gap: '20px',
     alignItems: 'center',
   },
   navLink: {
     color: '#555',
     textDecoration: 'none',
     fontWeight: '500',
+    transition: 'color 0.3s',
+  },
+  adminNav: {
+    color: '#c9a84c',
+    textDecoration: 'none',
+    fontWeight: 'bold',
     transition: 'color 0.3s',
   },
   contactNav: {
@@ -415,6 +430,12 @@ const styles = {
     color: '#555',
     textDecoration: 'none',
     padding: '8px 0',
+  },
+  mobileAdmin: {
+    color: '#c9a84c',
+    textDecoration: 'none',
+    padding: '8px 0',
+    fontWeight: 'bold',
   },
   mobileContact: {
     background: '#1e3a5f',
@@ -809,6 +830,12 @@ const styles = {
     fontSize: '13px',
     color: '#999',
     margin: 0,
+  },
+
+  // Admin Section
+  adminSection: {
+    padding: '40px 0',
+    background: '#f8f9fb',
   },
 
   // Contact
