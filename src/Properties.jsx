@@ -4,26 +4,66 @@ export default function Properties() {
   const [filterType, setFilterType] = useState('all');
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Fetch properties from GitHub
+  // ✅ Load properties from localStorage (same as Admin)
   useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        // REPLACE THIS URL WITH YOUR GITHUB RAW URL
-        const response = await fetch('https://raw.githubusercontent.com/22at1a0507/gupta-real-estate/main/properties.json');
-        if (!response.ok) throw new Error('Failed to fetch properties');
-        const data = await response.json();
-        setProperties(data.properties || []);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching properties:', err);
-        setError('Could not load properties. Please try again later.');
-        setLoading(false);
+    const loadProperties = () => {
+      const saved = localStorage.getItem('guptaProperties');
+      if (saved) {
+        try {
+          setProperties(JSON.parse(saved));
+        } catch (e) {
+          setProperties([]);
+        }
+      } else {
+        // Default properties if none exist
+        const defaults = [
+          {
+            id: 1,
+            type: 'plot',
+            title: 'Prime Residential Plot',
+            location: 'Kurnool City Center',
+            size: '1200 sq.ft',
+            price: '₹45 Lakhs',
+            image: 'https://via.placeholder.com/400x300?text=Plot+1',
+            description: 'Excellent residential plot in prime location.',
+            featured: true,
+            available: true,
+            dateAdded: '2026-07-20'
+          },
+          {
+            id: 2,
+            type: 'land',
+            title: 'Agricultural Land',
+            location: 'Nandyal Highway Road',
+            size: '2 Acres',
+            price: '₹1.2 Crores',
+            image: 'https://via.placeholder.com/400x300?text=Land+1',
+            description: 'Fertile agricultural land with water supply.',
+            featured: false,
+            available: true,
+            dateAdded: '2026-07-18'
+          }
+        ];
+        setProperties(defaults);
+        localStorage.setItem('guptaProperties', JSON.stringify(defaults));
       }
+      setLoading(false);
     };
 
-    fetchProperties();
+    loadProperties();
+
+    // Listen for changes in localStorage (when Admin updates)
+    const handleStorageChange = (e) => {
+      if (e.key === 'guptaProperties') {
+        loadProperties();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Get unique property types for filter buttons
@@ -73,21 +113,6 @@ export default function Properties() {
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <section style={styles.propertiesSection}>
-        <div style={styles.sectionContainer}>
-          <h2 style={styles.sectionTitle}>Available <span style={styles.goldText}>Properties</span></h2>
-          <div style={styles.divider}></div>
-          <p style={{ textAlign: 'center', color: 'red', padding: '40px 0' }}>
-            {error}
-          </p>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section id="properties" style={styles.propertiesSection}>
       <div style={styles.sectionContainer}>
@@ -124,11 +149,11 @@ export default function Properties() {
                 )}
                 <div style={styles.propertyImageContainer}>
                   <img 
-                    src={property.image || '/placeholder-property.jpg'} 
+                    src={property.image || 'https://via.placeholder.com/400x300?text=No+Image'} 
                     alt={property.title}
                     style={styles.propertyImage}
                     onError={(e) => {
-                      e.target.src = '/placeholder-property.jpg';
+                      e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
                     }}
                   />
                   <div style={{
@@ -240,6 +265,7 @@ const styles = {
     position: 'relative',
     height: '220px',
     overflow: 'hidden',
+    background: '#f5f5f5',
   },
   propertyImage: {
     width: '100%',
