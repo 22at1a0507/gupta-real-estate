@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Properties from './Properties';
 import Admin from './Admin';
 
-export default function App() {
+// Wrapper component that handles the layout and routing
+function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Check if we're on a specific page
+  const isHome = location.pathname === '/';
+  const isProperties = location.pathname === '/properties';
+  const isAdmin = location.pathname === '/admin';
 
   return (
     <div style={styles.app}>
       {/* Floating WhatsApp & Call Buttons */}
       <div style={styles.floatingButtons}>
-        <a href="https://wa.me/919393810954" target="_blank" style={styles.whatsappFloat}>
+        <a href="https://wa.me/919393810954" target="_blank" rel="noopener noreferrer" style={styles.whatsappFloat}>
           💬 WhatsApp
         </a>
         <a href="tel:+919393810954" style={styles.callFloat}>
@@ -21,17 +29,19 @@ export default function App() {
       <nav style={styles.nav}>
         <div style={styles.navContainer}>
           <div style={styles.logoContainer}>
-            <span style={styles.logo}>Gupta <span style={styles.logoGold}>Real Estate Consultancy</span></span>
+            <Link to="/" style={styles.logo}>
+              Gupta <span style={styles.logoGold}>Real Estate Consultancy</span>
+            </Link>
             <span style={styles.badge}>25+ Years</span>
           </div>
           <div style={styles.navLinks}>
-            <a href="#home" style={styles.navLink}>Home</a>
-            <a href="#about" style={styles.navLink}>About</a>
-            <a href="#services" style={styles.navLink}>Services</a>
-            <a href="#properties" style={styles.navLink}>Properties</a>
-            <a href="#testimonials" style={styles.navLink}>Testimonials</a>
-            <a href="#admin" style={styles.adminNav}>🔒 Admin</a>
-            <a href="#contact" style={styles.contactNav}>Contact</a>
+            <Link to="/" style={styles.navLink}>Home</Link>
+            <Link to="/properties" style={styles.navLink}>Properties</Link>
+            <Link to="/admin" style={styles.adminNav}>🔒 Admin</Link>
+            <a href="#contact" style={styles.contactNav} onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+            }}>Contact</a>
           </div>
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={styles.menuBtn}>
             ☰
@@ -39,206 +49,208 @@ export default function App() {
         </div>
         {mobileMenuOpen && (
           <div style={styles.mobileMenu}>
-            <a href="#home" style={styles.mobileLink}>Home</a>
-            <a href="#about" style={styles.mobileLink}>About</a>
-            <a href="#services" style={styles.mobileLink}>Services</a>
-            <a href="#properties" style={styles.mobileLink}>Properties</a>
-            <a href="#testimonials" style={styles.mobileLink}>Testimonials</a>
-            <a href="#admin" style={styles.mobileAdmin}>🔒 Admin</a>
-            <a href="#contact" style={styles.mobileContact}>Contact</a>
+            <Link to="/" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <Link to="/properties" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Properties</Link>
+            <Link to="/admin" style={styles.mobileAdmin} onClick={() => setMobileMenuOpen(false)}>🔒 Admin</Link>
+            <a href="#contact" style={styles.mobileContact} onClick={(e) => {
+              e.preventDefault();
+              setMobileMenuOpen(false);
+              document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+            }}>Contact</a>
           </div>
         )}
       </nav>
 
-      {/* HERO SECTION WITH VIDEO */}
-      <section id="home" style={styles.hero}>
-        <div style={styles.heroContainer}>
-          <div style={styles.heroContent}>
-            <span style={styles.trustBadge}>🏆 25+ Years of Trust</span>
-            <h1 style={styles.heroTitle}>
-              Gupta<br />
-              <span style={styles.heroGold}>Real Estate Consultant</span>
-            </h1>
-            <p style={styles.heroDesc}>
-              Helping families and investors buy and sell lands, plots, houses, and commercial properties for over 25 years. Honest advice, verified properties, and smooth transactions.
-            </p>
-            <div style={styles.heroButtons}>
-              <a href="tel:+919393810954" style={styles.callBtn}>
-                📞 Call Now
-              </a>
-              <a href="https://wa.me/919393810954" target="_blank" style={styles.whatsappBtn}>
-                💬 WhatsApp
-              </a>
-            </div>
-            <div style={styles.stats}>
-              <span>✅ 2000+ Happy Clients</span>
-              <span>✅ Verified Properties</span>
-            </div>
-          </div>
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={
+          <>
+            {/* HERO SECTION WITH VIDEO */}
+            <section id="home" style={styles.hero}>
+              <div style={styles.heroContainer}>
+                <div style={styles.heroContent}>
+                  <span style={styles.trustBadge}>🏆 25+ Years of Trust</span>
+                  <h1 style={styles.heroTitle}>
+                    Gupta<br />
+                    <span style={styles.heroGold}>Real Estate Consultant</span>
+                  </h1>
+                  <p style={styles.heroDesc}>
+                    Helping families and investors buy and sell lands, plots, houses, and commercial properties for over 25 years. Honest advice, verified properties, and smooth transactions.
+                  </p>
+                  <div style={styles.heroButtons}>
+                    <a href="tel:+919393810954" style={styles.callBtn}>
+                      📞 Call Now
+                    </a>
+                    <a href="https://wa.me/919393810954" target="_blank" rel="noopener noreferrer" style={styles.whatsappBtn}>
+                      💬 WhatsApp
+                    </a>
+                  </div>
+                  <div style={styles.stats}>
+                    <span>✅ 2000+ Happy Clients</span>
+                    <span>✅ Verified Properties</span>
+                  </div>
+                </div>
 
-          {/* VIDEO CONTAINER */}
-          <div style={styles.heroVideoContainer}>
-            <div style={styles.videoBox}>
-              <video 
-                controls 
-                autoPlay 
-                muted 
-                loop 
-                playsInline
-                style={styles.heroVideo}
-              >
-                <source src="/Gupta Consultancy.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div style={styles.videoBadge}>🎬 Watch Our Video</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ABOUT SECTION */}
-      <section id="about" style={styles.aboutSection}>
-        <div style={styles.sectionContainer}>
-          <h2 style={styles.sectionTitle}>About <span style={styles.goldText}>the Consultant</span></h2>
-          <div style={styles.divider}></div>
-          <div style={styles.aboutGrid}>
-            <div style={styles.aboutLeft}>
-              <div style={styles.avatar}>
-                <img 
-                  src="/gupta.png" 
-                  alt="Mr. A Venkateswarlu Gupta" 
-                  style={styles.avatarImage}
-                />
-              </div>
-              <h3 style={styles.agentName}>Mr. A Venkateswarlu Gupta</h3>
-              <p style={styles.agentTitle}>Founder & Senior Consultant</p>
-              <div style={styles.aboutList}>
-                <p>✅ <strong>25+ years</strong> of real estate experience</p>
-                <p>✅ <strong>2000+</strong> happy customers</p>
-                <p>✅ Trusted local consultant, Kurnool</p>
-                <p>✅ Expert property guidance & documentation</p>
-              </div>
-              <div style={styles.tags}>
-                <span style={styles.tag}>Honesty</span>
-                <span style={styles.tag}>Transparency</span>
-                <span style={styles.tag}>Local Expertise</span>
-              </div>
-            </div>
-            
-            <div style={styles.aboutRight}>
-              <h4 style={styles.aboutHeading}>💡 Why clients trust us</h4>
-              <ul style={styles.trustList}>
-                <li><span style={styles.starIcon}>⭐</span> <strong>25+ years</strong> of market insight – we know every locality, every trend.</li>
-                <li><span style={styles.starIcon}>⭐</span> <strong>Verified properties</strong> – we personally inspect and verify documents.</li>
-                <li><span style={styles.starIcon}>⭐</span> <strong>End-to-end support</strong> – from site visit to legal paperwork.</li>
-                <li><span style={styles.starIcon}>⭐</span> <strong>Personalized service</strong> – we listen to your needs and find the best match.</li>
-              </ul>
-              <div style={styles.quoteBox}>
-                <p style={styles.quoteText}>"We don't just sell properties, we build lifelong relationships."</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SERVICES SECTION */}
-      <section id="services" style={styles.servicesSection}>
-        <div style={styles.sectionContainer}>
-          <h2 style={styles.sectionTitle}>Our <span style={styles.goldText}>Services</span></h2>
-          <div style={styles.divider}></div>
-          <p style={styles.sectionSubtitle}>Expert guidance for every step of your property journey</p>
-          <div style={styles.servicesGrid}>
-            {[
-              { icon: '🏢', title: 'Land Buying & Selling', desc: 'Agricultural, residential, and commercial land deals.' },
-              { icon: '🏠', title: 'House Buying & Selling', desc: 'Villas, independent houses, and gated community homes.' },
-              { icon: '📐', title: 'Plot Sales', desc: 'Residential plots, corner plots, and layout sales.' },
-              { icon: '🏪', title: 'Commercial Properties', desc: 'Shops, offices, and investment commercial spaces.' },
-              { icon: '📈', title: 'Investment Consultation', desc: 'Smart property investment advice & portfolio guidance.' },
-              { icon: '📋', title: 'Documentation & Legal', desc: 'Property docs, site visits, legal coordination support.' },
-            ].map((service, idx) => (
-              <div key={idx} style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>{service.icon}</div>
-                <h4 style={styles.serviceTitle}>{service.title}</h4>
-                <p style={styles.serviceDesc}>{service.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WHY CHOOSE US */}
-      <section id="whyus" style={styles.whySection}>
-        <div style={styles.sectionContainer}>
-          <h2 style={styles.sectionTitle}>Why <span style={styles.goldText}>Choose Us</span></h2>
-          <div style={styles.divider}></div>
-          <div style={styles.whyGrid}>
-            {[
-              { icon: '🏆', title: '25+ Years Experience', desc: 'Deep local knowledge and proven track record.' },
-              { icon: '🤝', title: 'Honest Guidance', desc: 'No pressure, only genuine advice for your benefit.' },
-              { icon: '📋', title: 'Transparent Deals', desc: 'Clear terms, verified documents, and fair pricing.' },
-              { icon: '📍', title: 'Local Market Knowledge', desc: 'Insider expertise in Kurnool, Nandyal, Hyderabad.' },
-              { icon: '⭐', title: 'Personalized Service', desc: 'Tailored solutions for families, NRI, and investors.' },
-              { icon: '🔄', title: 'End-to-End Support', desc: 'From site visits to legal assistance – we\'re with you.' },
-            ].map((item, idx) => (
-              <div key={idx} style={styles.whyCard}>
-                <div style={styles.whyIcon}>{item.icon}</div>
-                <h4 style={styles.whyTitle}>{item.title}</h4>
-                <p style={styles.whyDesc}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SERVICE AREAS */}
-      <section id="areas" style={styles.areasSection}>
-        <div style={styles.sectionContainer}>
-          <h2 style={styles.sectionTitle}>Service <span style={styles.goldText}>Areas</span></h2>
-          <div style={styles.divider}></div>
-          <div style={styles.areasContainer}>
-            {['Kurnool', 'Nandyal', 'Hyderabad', 'Adoni', 'Bangalore', 'Atmakur', 'Nearby areas'].map((area) => (
-              <span key={area} style={styles.areaTag}>{area}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PROPERTIES SECTION - Loads from Supabase */}
-      <Properties />
-
-      {/* TESTIMONIALS */}
-      <section id="testimonials" style={styles.testimonialsSection}>
-        <div style={styles.sectionContainer}>
-          <h2 style={styles.sectionTitle}>What <span style={styles.goldText}>Clients Say</span></h2>
-          <div style={styles.divider}></div>
-          <div style={styles.testimonialsGrid}>
-            {[
-              { text: 'We found our dream plot through his guidance. The entire process was smooth and transparent.', name: 'Dr. Lakshmana Swamy', place: 'Kurnool' },
-              { text: 'Professional, honest, and deeply knowledgeable. He helped us buy commercial property with full legal clarity.', name: 'Anita Reddy', place: 'Investor, Kurnool' },
-              { text: 'He sold our land within weeks and got us a better price than expected. Highly recommend.', name: 'Ramesh', place: 'Hyderabad' },
-              { text: 'As an NRI, I needed someone trustworthy. He handled everything – site visit, documents, and registration.', name: 'Chakradhar', place: 'USA' },
-            ].map((t, idx) => (
-              <div key={idx} style={styles.testimonialCard}>
-                <p style={styles.testimonialText}>"{t.text}"</p>
-                <div style={styles.testimonialAuthor}>
-                  <div style={styles.testimonialAvatar}>👤</div>
-                  <div>
-                    <p style={styles.testimonialName}>{t.name}</p>
-                    <p style={styles.testimonialPlace}>{t.place}</p>
+                {/* VIDEO CONTAINER */}
+                <div style={styles.heroVideoContainer}>
+                  <div style={styles.videoBox}>
+                    <video 
+                      controls 
+                      autoPlay 
+                      muted 
+                      loop 
+                      playsInline
+                      style={styles.heroVideo}
+                    >
+                      <source src="/Gupta Consultancy.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                    <div style={styles.videoBadge}>🎬 Watch Our Video</div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </section>
 
-      {/* ADMIN PANEL - Password Protected */}
-      <section id="admin" style={styles.adminSection}>
-        <Admin />
-      </section>
+            {/* ABOUT SECTION */}
+            <section id="about" style={styles.aboutSection}>
+              <div style={styles.sectionContainer}>
+                <h2 style={styles.sectionTitle}>About <span style={styles.goldText}>the Consultant</span></h2>
+                <div style={styles.divider}></div>
+                <div style={styles.aboutGrid}>
+                  <div style={styles.aboutLeft}>
+                    <div style={styles.avatar}>
+                      <img 
+                        src="/gupta.png" 
+                        alt="Mr. A Venkateswarlu Gupta" 
+                        style={styles.avatarImage}
+                      />
+                    </div>
+                    <h3 style={styles.agentName}>Mr. A Venkateswarlu Gupta</h3>
+                    <p style={styles.agentTitle}>Founder & Senior Consultant</p>
+                    <div style={styles.aboutList}>
+                      <p>✅ <strong>25+ years</strong> of real estate experience</p>
+                      <p>✅ <strong>2000+</strong> happy customers</p>
+                      <p>✅ Trusted local consultant, Kurnool</p>
+                      <p>✅ Expert property guidance & documentation</p>
+                    </div>
+                    <div style={styles.tags}>
+                      <span style={styles.tag}>Honesty</span>
+                      <span style={styles.tag}>Transparency</span>
+                      <span style={styles.tag}>Local Expertise</span>
+                    </div>
+                  </div>
+                  
+                  <div style={styles.aboutRight}>
+                    <h4 style={styles.aboutHeading}>💡 Why clients trust us</h4>
+                    <ul style={styles.trustList}>
+                      <li><span style={styles.starIcon}>⭐</span> <strong>25+ years</strong> of market insight – we know every locality, every trend.</li>
+                      <li><span style={styles.starIcon}>⭐</span> <strong>Verified properties</strong> – we personally inspect and verify documents.</li>
+                      <li><span style={styles.starIcon}>⭐</span> <strong>End-to-end support</strong> – from site visit to legal paperwork.</li>
+                      <li><span style={styles.starIcon}>⭐</span> <strong>Personalized service</strong> – we listen to your needs and find the best match.</li>
+                    </ul>
+                    <div style={styles.quoteBox}>
+                      <p style={styles.quoteText}>"We don't just sell properties, we build lifelong relationships."</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-      {/* CONTACT SECTION */}
+            {/* SERVICES SECTION */}
+            <section id="services" style={styles.servicesSection}>
+              <div style={styles.sectionContainer}>
+                <h2 style={styles.sectionTitle}>Our <span style={styles.goldText}>Services</span></h2>
+                <div style={styles.divider}></div>
+                <p style={styles.sectionSubtitle}>Expert guidance for every step of your property journey</p>
+                <div style={styles.servicesGrid}>
+                  {[
+                    { icon: '🏢', title: 'Land Buying & Selling', desc: 'Agricultural, residential, and commercial land deals.' },
+                    { icon: '🏠', title: 'House Buying & Selling', desc: 'Villas, independent houses, and gated community homes.' },
+                    { icon: '📐', title: 'Plot Sales', desc: 'Residential plots, corner plots, and layout sales.' },
+                    { icon: '🏪', title: 'Commercial Properties', desc: 'Shops, offices, and investment commercial spaces.' },
+                    { icon: '📈', title: 'Investment Consultation', desc: 'Smart property investment advice & portfolio guidance.' },
+                    { icon: '📋', title: 'Documentation & Legal', desc: 'Property docs, site visits, legal coordination support.' },
+                  ].map((service, idx) => (
+                    <div key={idx} style={styles.serviceCard}>
+                      <div style={styles.serviceIcon}>{service.icon}</div>
+                      <h4 style={styles.serviceTitle}>{service.title}</h4>
+                      <p style={styles.serviceDesc}>{service.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* WHY CHOOSE US */}
+            <section id="whyus" style={styles.whySection}>
+              <div style={styles.sectionContainer}>
+                <h2 style={styles.sectionTitle}>Why <span style={styles.goldText}>Choose Us</span></h2>
+                <div style={styles.divider}></div>
+                <div style={styles.whyGrid}>
+                  {[
+                    { icon: '🏆', title: '25+ Years Experience', desc: 'Deep local knowledge and proven track record.' },
+                    { icon: '🤝', title: 'Honest Guidance', desc: 'No pressure, only genuine advice for your benefit.' },
+                    { icon: '📋', title: 'Transparent Deals', desc: 'Clear terms, verified documents, and fair pricing.' },
+                    { icon: '📍', title: 'Local Market Knowledge', desc: 'Insider expertise in Kurnool, Nandyal, Hyderabad.' },
+                    { icon: '⭐', title: 'Personalized Service', desc: 'Tailored solutions for families, NRI, and investors.' },
+                    { icon: '🔄', title: 'End-to-End Support', desc: 'From site visits to legal assistance – we\'re with you.' },
+                  ].map((item, idx) => (
+                    <div key={idx} style={styles.whyCard}>
+                      <div style={styles.whyIcon}>{item.icon}</div>
+                      <h4 style={styles.whyTitle}>{item.title}</h4>
+                      <p style={styles.whyDesc}>{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* SERVICE AREAS */}
+            <section id="areas" style={styles.areasSection}>
+              <div style={styles.sectionContainer}>
+                <h2 style={styles.sectionTitle}>Service <span style={styles.goldText}>Areas</span></h2>
+                <div style={styles.divider}></div>
+                <div style={styles.areasContainer}>
+                  {['Kurnool', 'Nandyal', 'Hyderabad', 'Adoni', 'Bangalore', 'Atmakur', 'Nearby areas'].map((area) => (
+                    <span key={area} style={styles.areaTag}>{area}</span>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* TESTIMONIALS */}
+            <section id="testimonials" style={styles.testimonialsSection}>
+              <div style={styles.sectionContainer}>
+                <h2 style={styles.sectionTitle}>What <span style={styles.goldText}>Clients Say</span></h2>
+                <div style={styles.divider}></div>
+                <div style={styles.testimonialsGrid}>
+                  {[
+                    { text: 'We found our dream plot through his guidance. The entire process was smooth and transparent.', name: 'Dr. Lakshmana Swamy', place: 'Kurnool' },
+                    { text: 'Professional, honest, and deeply knowledgeable. He helped us buy commercial property with full legal clarity.', name: 'Anita Reddy', place: 'Investor, Kurnool' },
+                    { text: 'He sold our land within weeks and got us a better price than expected. Highly recommend.', name: 'Ramesh', place: 'Hyderabad' },
+                    { text: 'As an NRI, I needed someone trustworthy. He handled everything – site visit, documents, and registration.', name: 'Chakradhar', place: 'USA' },
+                  ].map((t, idx) => (
+                    <div key={idx} style={styles.testimonialCard}>
+                      <p style={styles.testimonialText}>"{t.text}"</p>
+                      <div style={styles.testimonialAuthor}>
+                        <div style={styles.testimonialAvatar}>👤</div>
+                        <div>
+                          <p style={styles.testimonialName}>{t.name}</p>
+                          <p style={styles.testimonialPlace}>{t.place}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        } />
+        <Route path="/properties" element={<Properties />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+
+      {/* CONTACT SECTION - Visible on all pages */}
       <section id="contact" style={styles.contactSection}>
         <div style={styles.contactContainer}>
           <h2 style={styles.contactTitle}>Let's <span style={styles.contactGold}>Connect</span></h2>
@@ -254,7 +266,7 @@ export default function App() {
               <a href="tel:+919393810954" style={styles.contactCallBtn}>
                 📞 Call Now
               </a>
-              <a href="https://wa.me/919393810954" target="_blank" style={styles.contactWhatsappBtn}>
+              <a href="https://wa.me/919393810954" target="_blank" rel="noopener noreferrer" style={styles.contactWhatsappBtn}>
                 💬 Chat on WhatsApp
               </a>
             </div>
@@ -280,13 +292,13 @@ export default function App() {
           </div>
           <div style={styles.footerCol}>
             <h4 style={styles.footerHeading}>Quick Links</h4>
-            <a href="#home" style={styles.footerLink}>Home</a>
-            <a href="#about" style={styles.footerLink}>About</a>
-            <a href="#services" style={styles.footerLink}>Services</a>
-            <a href="#properties" style={styles.footerLink}>Properties</a>
-            <a href="#testimonials" style={styles.footerLink}>Testimonials</a>
-            <a href="#admin" style={styles.footerLink}>Admin</a>
-            <a href="#contact" style={styles.footerLink}>Contact</a>
+            <Link to="/" style={styles.footerLink}>Home</Link>
+            <Link to="/properties" style={styles.footerLink}>Properties</Link>
+            <Link to="/admin" style={styles.footerLink}>Admin</Link>
+            <a href="#contact" style={styles.footerLink} onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+            }}>Contact</a>
           </div>
           <div style={styles.footerCol}>
             <h4 style={styles.footerHeading}>Contact</h4>
@@ -306,6 +318,15 @@ export default function App() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Main App component
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
@@ -373,6 +394,7 @@ const styles = {
     fontSize: '24px',
     fontWeight: 'bold',
     color: '#1e3a5f',
+    textDecoration: 'none',
   },
   logoGold: {
     color: '#c9a84c',
@@ -830,12 +852,6 @@ const styles = {
     fontSize: '13px',
     color: '#999',
     margin: 0,
-  },
-
-  // Admin Section
-  adminSection: {
-    padding: '40px 0',
-    background: '#f8f9fb',
   },
 
   // Contact
