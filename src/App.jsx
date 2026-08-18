@@ -233,7 +233,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* ADMIN PANEL */}
+      {/* ADMIN PANEL - Visible to everyone but password protected */}
       <section id="admin" style={styles.adminSection}>
         <Admin />
       </section>
