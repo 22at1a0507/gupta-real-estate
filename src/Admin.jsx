@@ -22,12 +22,13 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
+  // 🔒 Get password and API key from environment variables
   const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '197324';
-const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
+  const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || 'abc14bnu3789';
 
-// ADD THIS DEBUG LINE
-console.log('API Key loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
-console.log('Admin Password loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
+  // 🔍 Debug - Check if loaded (Remove these console.logs after testing)
+  console.log('🔑 IMGBB_API_KEY loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
+  console.log('🔒 ADMIN_PASSWORD loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
 
   // Check if already logged in
   useEffect(() => {
@@ -96,8 +97,8 @@ console.log('Admin Password loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
     if (!file) return;
 
     // Check if API key exists
-    if (!IMGBB_API_KEY) {
-      alert('❌ ImgBB API key is not configured. Please add VITE_IMGBB_API_KEY to your environment variables.');
+    if (!IMGBB_API_KEY || IMGBB_API_KEY === 'abc14bnu3789') {
+      alert('❌ ImgBB API key is not configured properly. Please check your environment variables.');
       e.target.value = '';
       return;
     }
