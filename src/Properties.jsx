@@ -1,3 +1,4 @@
+// src/Properties.jsx
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
@@ -170,6 +171,7 @@ export default function Properties() {
   );
 }
 
+// ============ STYLES ============
 const styles = {
   propertiesSection: {
     padding: '80px 0',
@@ -315,17 +317,18 @@ const styles = {
     color: '#666',
     fontSize: '18px',
     padding: '40px 0',
+    gridColumn: '1 / -1',
   },
 };
 
-// Add media queries
+// Add media queries dynamically
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
-  @media (max-width: 768px) {
-    .properties-grid { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 1024px) {
+    .properties-grid { grid-template-columns: repeat(2, 1fr) !important; }
   }
-  @media (max-width: 480px) {
-    .properties-grid { grid-template-columns: 1fr; }
+  @media (max-width: 600px) {
+    .properties-grid { grid-template-columns: 1fr !important; }
   }
 `;
 document.head.appendChild(styleSheet);
