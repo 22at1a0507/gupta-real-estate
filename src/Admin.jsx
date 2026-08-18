@@ -61,7 +61,7 @@ export default function Admin() {
     setUploadStatus('');
 
     if (!IMGBB_API_KEY) {
-      alert('❌ ImgBB API key is not configured.');
+      alert('❌ ImgBB API key is not configured. Please add VITE_IMGBB_API_KEY.');
       e.target.value = '';
       return;
     }
@@ -104,7 +104,7 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Upload error:', error);
-      setUploadStatus('❌ Upload failed.');
+      setUploadStatus('❌ Upload failed. Check console for details.');
       alert('❌ Upload failed. Please check your internet connection.');
     } finally {
       setUploading(false);
@@ -160,6 +160,9 @@ export default function Admin() {
         available: true,
         dateAdded: new Date().toISOString().split('T')[0]
       });
+      
+      // ✅ Notify Properties page to refresh
+      window.dispatchEvent(new Event('propertyUpdated'));
       alert('✅ Property added successfully!');
     } catch (error) {
       console.error('Error adding property:', error);
@@ -199,6 +202,9 @@ export default function Admin() {
         available: true,
         dateAdded: new Date().toISOString().split('T')[0]
       });
+      
+      // ✅ Notify Properties page to refresh
+      window.dispatchEvent(new Event('propertyUpdated'));
       alert('✅ Property updated successfully!');
     } catch (error) {
       console.error('Error updating property:', error);
@@ -219,6 +225,9 @@ export default function Admin() {
       if (error) throw error;
 
       setProperties(properties.filter(p => p.id !== id));
+      
+      // ✅ Notify Properties page to refresh
+      window.dispatchEvent(new Event('propertyUpdated'));
       alert('✅ Property deleted successfully!');
     } catch (error) {
       console.error('Error deleting property:', error);
@@ -267,6 +276,7 @@ export default function Admin() {
             if (error) throw error;
             
             await loadProperties();
+            window.dispatchEvent(new Event('propertyUpdated'));
             alert('✅ Properties imported successfully!');
           } else {
             alert('❌ Invalid format. Please upload a valid properties array.');
@@ -392,6 +402,7 @@ export default function Admin() {
               
               if (error) throw error;
               await loadProperties();
+              window.dispatchEvent(new Event('propertyUpdated'));
               alert('✅ All properties cleared!');
             } catch (error) {
               alert('❌ Error clearing properties. Please try again.');
@@ -541,7 +552,7 @@ export default function Admin() {
                   </div>
                 )}
               </div>
-              <small style={styles.helpText}>📱 Works on mobile, laptop, and tablet!</small>
+              <small style={styles.helpText}>📱 Works on mobile, laptop, and tablet! Supported formats: JPG, PNG, GIF</small>
             </div>
 
             <div style={styles.formGroup}>
