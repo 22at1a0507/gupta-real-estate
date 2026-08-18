@@ -9,6 +9,7 @@ export default function Admin() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     type: 'plot',
@@ -22,15 +23,12 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  // 🔒 Get password and API key from environment variables
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '197324';
-  const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
+  // ✅ HARDCODED API KEY - WORKS EVERYWHERE!
+  const ADMIN_PASSWORD = '197324';
+  const IMGBB_API_KEY = 'a94bcc7954ea30d3dba3b5037f5d522a';
 
-  // 🔍 Debug - Check if loaded
-  console.log('🔑 IMGBB_API_KEY value:', IMGBB_API_KEY);
-  console.log('🔑 IMGBB_API_KEY length:', IMGBB_API_KEY.length);
-  console.log('🔒 ADMIN_PASSWORD loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
-  console.log('🔑 IMGBB_API_KEY loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
+  console.log('🔑 API Key loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
+  console.log('🔑 API Key value:', IMGBB_API_KEY);
 
   // Check if already logged in
   useEffect(() => {
@@ -93,21 +91,23 @@ export default function Admin() {
     }
   }, [properties, isAuthenticated]);
 
-  // Image Upload Function
+  // ✅ Image Upload Function - Uses hardcoded API key
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Check if API key exists and is not empty
-    if (!IMGBB_API_KEY || IMGBB_API_KEY.trim() === '') {
-      alert('❌ ImgBB API key is not configured. Please add VITE_IMGBB_API_KEY to your environment variables.');
+    setUploadStatus('');
+
+    // Check if API key is set
+    if (!IMGBB_API_KEY) {
+      alert('❌ API key is missing!');
       e.target.value = '';
       return;
     }
 
-    // Check file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('❌ Image size should be less than 10MB');
+    // Check file size (max 32MB)
+    if (file.size > 32 * 1024 * 1024) {
+      alert('❌ Image size should be less than 32MB');
       e.target.value = '';
       return;
     }
@@ -120,10 +120,13 @@ export default function Admin() {
     }
 
     setUploading(true);
+    setUploadStatus('📤 Uploading image...');
 
     try {
       const formDataImg = new FormData();
       formDataImg.append('image', file);
+
+      console.log('🔑 Uploading with API Key:', IMGBB_API_KEY);
 
       const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
         method: 'POST',
@@ -131,17 +134,23 @@ export default function Admin() {
       });
 
       const data = await response.json();
+      console.log('📥 ImgBB Response:', data);
 
       if (data.success) {
-        const imageUrl = data.data.url;
+        const imageUrl = data.data.url || data.data.display_url;
         setFormData({ ...formData, image: imageUrl });
+        setUploadStatus('✅ Image uploaded successfully!');
         alert('✅ Image uploaded successfully!');
       } else {
-        alert('❌ Upload failed: ' + (data.error?.message || 'Unknown error'));
+        const errorMsg = data.error?.message || 'Unknown error';
+        setUploadStatus('❌ Upload failed: ' + errorMsg);
+        alert('❌ Upload failed: ' + errorMsg);
+        console.error('ImgBB Error:', data);
       }
     } catch (error) {
-      alert('❌ Upload failed. Please check your internet connection.');
       console.error('Upload error:', error);
+      setUploadStatus('❌ Upload failed. Check console for details.');
+      alert('❌ Upload failed. Please check your internet connection.');
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -502,6 +511,15 @@ export default function Admin() {
                 <label htmlFor="imageUpload" style={styles.uploadLabel}>
                   {uploading ? '⏳ Uploading...' : '📸 Click to Upload Image'}
                 </label>
+                {uploadStatus && (
+                  <p style={{ 
+                    marginTop: '8px', 
+                    fontSize: '14px',
+                    color: uploadStatus.includes('✅') ? '#2ecc71' : '#e74c3c'
+                  }}>
+                    {uploadStatus}
+                  </p>
+                )}
                 {formData.image && (
                   <div style={styles.imagePreview}>
                     <img src={formData.image} alt="Property" style={styles.previewImage} />
