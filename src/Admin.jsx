@@ -23,12 +23,12 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  // ✅ HARDCODED API KEY - WORKS EVERYWHERE!
-  const ADMIN_PASSWORD = '197324';
-  const IMGBB_API_KEY = 'a94bcc7954ea30d3dba3b5037f5d522a';
+  // ✅ SECURE: Load from environment variables (NOT hardcoded!)
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '';
+  const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
 
   console.log('🔑 API Key loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
-  console.log('🔑 API Key value:', IMGBB_API_KEY);
+  console.log('🔒 Password loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
 
   // Check if already logged in
   useEffect(() => {
@@ -91,16 +91,16 @@ export default function Admin() {
     }
   }, [properties, isAuthenticated]);
 
-  // ✅ Image Upload Function - Uses hardcoded API key
+  // Image Upload Function
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setUploadStatus('');
 
-    // Check if API key is set
+    // Check if API key exists
     if (!IMGBB_API_KEY) {
-      alert('❌ API key is missing!');
+      alert('❌ API key not configured. Please add VITE_IMGBB_API_KEY to your environment variables.');
       e.target.value = '';
       return;
     }
@@ -126,15 +126,12 @@ export default function Admin() {
       const formDataImg = new FormData();
       formDataImg.append('image', file);
 
-      console.log('🔑 Uploading with API Key:', IMGBB_API_KEY);
-
       const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
         method: 'POST',
         body: formDataImg
       });
 
       const data = await response.json();
-      console.log('📥 ImgBB Response:', data);
 
       if (data.success) {
         const imageUrl = data.data.url || data.data.display_url;
