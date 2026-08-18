@@ -6,25 +6,47 @@ export default function Properties() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load properties from Supabase (NOT localStorage!)
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .order('id', { ascending: false });
+  // ✅ Load properties from Supabase
+  const loadProperties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('id', { ascending: false });
 
-        if (error) throw error;
-        setProperties(data || []);
-      } catch (error) {
-        console.error('Error loading properties:', error);
-      } finally {
-        setLoading(false);
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (error) {
+      console.error('Error loading properties:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProperties();
+
+    // ✅ Listen for custom event from Admin
+    const handlePropertyUpdate = () => {
+      setLoading(true);
+      loadProperties();
+    };
+
+    // ✅ Listen for localStorage changes
+    const handleStorageChange = (e) => {
+      if (e.key === 'guptaProperties') {
+        setLoading(true);
+        loadProperties();
       }
     };
 
-    loadProperties();
+    window.addEventListener('propertyUpdated', handlePropertyUpdate);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('propertyUpdated', handlePropertyUpdate);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Get unique property types for filter buttons
