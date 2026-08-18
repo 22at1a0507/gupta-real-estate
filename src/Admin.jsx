@@ -8,6 +8,7 @@ export default function Admin() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     type: 'plot',
@@ -21,8 +22,9 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  // 🔒 CHANGE THIS PASSWORD - Keep it secret!
-  const ADMIN_PASSWORD = '197324';
+  // 🔒 Get password from environment variables
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'gupta2026';
+  const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
 
   // Check if already logged in
   useEffect(() => {
@@ -44,7 +46,6 @@ export default function Admin() {
           setProperties([]);
         }
       } else {
-        // Default properties
         const defaults = [
           {
             id: 1,
@@ -79,12 +80,67 @@ export default function Admin() {
     }
   }, [isAuthenticated]);
 
-  // Save to localStorage whenever properties change
+  // Save to localStorage
   useEffect(() => {
     if (isAuthenticated && properties.length > 0) {
       localStorage.setItem('guptaProperties', JSON.stringify(properties));
     }
   }, [properties, isAuthenticated]);
+
+  // Image Upload Function
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check if API key exists
+    if (!IMGBB_API_KEY) {
+      alert('❌ ImgBB API key is not configured. Please add VITE_IMGBB_API_KEY to your environment variables.');
+      e.target.value = '';
+      return;
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('❌ Image size should be less than 10MB');
+      e.target.value = '';
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('❌ Please upload an image file');
+      e.target.value = '';
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formDataImg = new FormData();
+      formDataImg.append('image', file);
+
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: formDataImg
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const imageUrl = data.data.url;
+        setFormData({ ...formData, image: imageUrl });
+        alert('✅ Image uploaded successfully!');
+      } else {
+        alert('❌ Upload failed: ' + (data.error?.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('❌ Upload failed. Please check your internet connection.');
+      console.error('Upload error:', error);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -425,16 +481,34 @@ export default function Admin() {
               </div>
             </div>
 
+            {/* Image Upload Section */}
             <div style={styles.formGroup}>
-              <label style={styles.formLabel}>Image URL</label>
-              <input
-                type="text"
-                value={formData.image}
-                onChange={(e) => setFormData({...formData, image: e.target.value})}
-                placeholder="https://example.com/image.jpg"
-                style={styles.formInput}
-              />
-              <small style={styles.helpText}>💡 Upload images to imgbb.com or postimages.org and paste the URL</small>
+              <label style={styles.formLabel}>Property Image</label>
+              <div style={styles.imageUploadContainer}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={styles.fileInput}
+                  id="imageUpload"
+                  disabled={uploading}
+                />
+                <label htmlFor="imageUpload" style={styles.uploadLabel}>
+                  {uploading ? '⏳ Uploading...' : '📸 Click to Upload Image'}
+                </label>
+                {formData.image && (
+                  <div style={styles.imagePreview}>
+                    <img src={formData.image} alt="Property" style={styles.previewImage} />
+                    <button 
+                      onClick={() => setFormData({...formData, image: ''})}
+                      style={styles.removeImageBtn}
+                    >
+                      ✕ Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+              <small style={styles.helpText}>📱 Works on mobile, laptop, and tablet! Supported formats: JPG, PNG, GIF</small>
             </div>
 
             <div style={styles.formGroup}>
@@ -482,8 +556,8 @@ export default function Admin() {
               </label>
             </div>
 
-            <button onClick={editingId ? handleUpdate : handleAdd} style={styles.saveBtn}>
-              {editingId ? '💾 Update Property' : '➕ Add Property'}
+            <button onClick={editingId ? handleUpdate : handleAdd} style={styles.saveBtn} disabled={uploading}>
+              {uploading ? '⏳ Uploading Image...' : (editingId ? '💾 Update Property' : '➕ Add Property')}
             </button>
           </div>
         </div>
@@ -941,4 +1015,72 @@ const styles = {
     color: '#666',
     fontSize: '13px',
   },
+
+  // Image Upload Styles
+  imageUploadContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  uploadLabel: {
+    display: 'inline-block',
+    background: '#f0f4f8',
+    color: '#1e3a5f',
+    padding: '12px 20px',
+    borderRadius: '8px',
+    border: '2px dashed #c9a84c',
+    cursor: 'pointer',
+    textAlign: 'center',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    transition: 'all 0.3s',
+  },
+  imagePreview: {
+    position: 'relative',
+    display: 'inline-block',
+    marginTop: '10px',
+  },
+  previewImage: {
+    width: '100%',
+    maxWidth: '300px',
+    maxHeight: '200px',
+    objectFit: 'cover',
+    borderRadius: '8px',
+    border: '2px solid #eee',
+  },
+  removeImageBtn: {
+    position: 'absolute',
+    top: '-10px',
+    right: '-10px',
+    background: '#e74c3c',
+    color: 'white',
+    border: 'none',
+    borderRadius: '50%',
+    width: '28px',
+    height: '28px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 };
+
+// Add media queries for mobile responsiveness
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @media (max-width: 768px) {
+    .formRow {
+      grid-template-columns: 1fr !important;
+    }
+    .stats {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .adminHeader {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+`;
+document.head.appendChild(styleSheet);
