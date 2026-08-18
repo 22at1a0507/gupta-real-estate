@@ -380,7 +380,7 @@ export default function Admin() {
         <label style={styles.importBtn}>
           📤 Import Data
           <input type="file" accept=".json" onChange={handleImport} style={styles.fileInput} />
-        </label>
+        </button>
         <button onClick={async () => {
           if (window.confirm('⚠️ Are you sure you want to delete ALL properties? This cannot be undone!')) {
             try {
