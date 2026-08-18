@@ -8,11 +8,6 @@ function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Check if we're on a specific page
-  const isHome = location.pathname === '/';
-  const isProperties = location.pathname === '/properties';
-  const isAdmin = location.pathname === '/admin';
-
   return (
     <div style={styles.app}>
       {/* Floating WhatsApp & Call Buttons */}
@@ -36,7 +31,6 @@ function AppContent() {
           </div>
           <div style={styles.navLinks}>
             <Link to="/" style={styles.navLink}>Home</Link>
-            <Link to="/properties" style={styles.navLink}>Properties</Link>
             <Link to="/admin" style={styles.adminNav}>🔒 Admin</Link>
             <a href="#contact" style={styles.contactNav} onClick={(e) => {
               e.preventDefault();
@@ -50,7 +44,6 @@ function AppContent() {
         {mobileMenuOpen && (
           <div style={styles.mobileMenu}>
             <Link to="/" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
-            <Link to="/properties" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Properties</Link>
             <Link to="/admin" style={styles.mobileAdmin} onClick={() => setMobileMenuOpen(false)}>🔒 Admin</Link>
             <a href="#contact" style={styles.mobileContact} onClick={(e) => {
               e.preventDefault();
@@ -218,6 +211,9 @@ function AppContent() {
               </div>
             </section>
 
+            {/* ⭐ PROPERTIES SECTION - NOW ON HOME PAGE */}
+            <Properties />
+
             {/* TESTIMONIALS */}
             <section id="testimonials" style={styles.testimonialsSection}>
               <div style={styles.sectionContainer}>
@@ -246,7 +242,6 @@ function AppContent() {
             </section>
           </>
         } />
-        <Route path="/properties" element={<Properties />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
 
@@ -293,7 +288,6 @@ function AppContent() {
           <div style={styles.footerCol}>
             <h4 style={styles.footerHeading}>Quick Links</h4>
             <Link to="/" style={styles.footerLink}>Home</Link>
-            <Link to="/properties" style={styles.footerLink}>Properties</Link>
             <Link to="/admin" style={styles.footerLink}>Admin</Link>
             <a href="#contact" style={styles.footerLink} onClick={(e) => {
               e.preventDefault();
