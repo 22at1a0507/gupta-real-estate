@@ -61,7 +61,7 @@ export default function Admin() {
     setUploadStatus('');
 
     if (!IMGBB_API_KEY) {
-      alert('❌ ImgBB API key is not configured. Please add VITE_IMGBB_API_KEY.');
+      alert('❌ ImgBB API key is not configured.');
       e.target.value = '';
       return;
     }
@@ -104,7 +104,7 @@ export default function Admin() {
       }
     } catch (error) {
       console.error('Upload error:', error);
-      setUploadStatus('❌ Upload failed. Check console for details.');
+      setUploadStatus('❌ Upload failed.');
       alert('❌ Upload failed. Please check your internet connection.');
     } finally {
       setUploading(false);
@@ -296,6 +296,7 @@ export default function Admin() {
     return colors[type] || '#1e3a5f';
   };
 
+  // Loading state
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -380,7 +381,7 @@ export default function Admin() {
         <label style={styles.importBtn}>
           📤 Import Data
           <input type="file" accept=".json" onChange={handleImport} style={styles.fileInput} />
-        </button>
+        </label>
         <button onClick={async () => {
           if (window.confirm('⚠️ Are you sure you want to delete ALL properties? This cannot be undone!')) {
             try {
@@ -540,7 +541,7 @@ export default function Admin() {
                   </div>
                 )}
               </div>
-              <small style={styles.helpText}>📱 Works on mobile, laptop, and tablet! Supported formats: JPG, PNG, GIF</small>
+              <small style={styles.helpText}>📱 Works on mobile, laptop, and tablet!</small>
             </div>
 
             <div style={styles.formGroup}>
