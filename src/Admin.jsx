@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -23,12 +24,25 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  // ✅ SECURE: Load from environment variables (NOT hardcoded!)
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '';
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '197324';
   const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
 
-  console.log('🔑 API Key loaded:', IMGBB_API_KEY ? '✅ Yes' : '❌ No');
-  console.log('🔒 Password loaded:', ADMIN_PASSWORD ? '✅ Yes' : '❌ No');
+  // ✅ Load properties from Supabase
+  const loadProperties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (error) {
+      console.error('Error loading properties:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check if already logged in
   useEffect(() => {
@@ -36,60 +50,8 @@ export default function Admin() {
     if (loggedIn === 'true') {
       setIsAuthenticated(true);
     }
-    setLoading(false);
+    loadProperties();
   }, []);
-
-  // Load properties from localStorage
-  useEffect(() => {
-    if (isAuthenticated) {
-      const saved = localStorage.getItem('guptaProperties');
-      if (saved) {
-        try {
-          setProperties(JSON.parse(saved));
-        } catch (e) {
-          setProperties([]);
-        }
-      } else {
-        const defaults = [
-          {
-            id: 1,
-            type: 'plot',
-            title: 'Prime Residential Plot',
-            location: 'Kurnool City Center',
-            size: '1200 sq.ft',
-            price: '₹45 Lakhs',
-            image: 'https://via.placeholder.com/400x300?text=Plot+1',
-            description: 'Excellent residential plot in prime location.',
-            featured: true,
-            available: true,
-            dateAdded: '2026-07-20'
-          },
-          {
-            id: 2,
-            type: 'land',
-            title: 'Agricultural Land',
-            location: 'Nandyal Highway Road',
-            size: '2 Acres',
-            price: '₹1.2 Crores',
-            image: 'https://via.placeholder.com/400x300?text=Land+1',
-            description: 'Fertile agricultural land with water supply.',
-            featured: false,
-            available: true,
-            dateAdded: '2026-07-18'
-          }
-        ];
-        setProperties(defaults);
-        localStorage.setItem('guptaProperties', JSON.stringify(defaults));
-      }
-    }
-  }, [isAuthenticated]);
-
-  // Save to localStorage
-  useEffect(() => {
-    if (isAuthenticated && properties.length > 0) {
-      localStorage.setItem('guptaProperties', JSON.stringify(properties));
-    }
-  }, [properties, isAuthenticated]);
 
   // Image Upload Function
   const handleImageUpload = async (e) => {
@@ -98,21 +60,18 @@ export default function Admin() {
 
     setUploadStatus('');
 
-    // Check if API key exists
     if (!IMGBB_API_KEY) {
-      alert('❌ API key not configured. Please add VITE_IMGBB_API_KEY to your environment variables.');
+      alert('❌ ImgBB API key is not configured. Please add VITE_IMGBB_API_KEY.');
       e.target.value = '';
       return;
     }
 
-    // Check file size (max 32MB)
     if (file.size > 32 * 1024 * 1024) {
       alert('❌ Image size should be less than 32MB');
       e.target.value = '';
       return;
     }
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       alert('❌ Please upload an image file');
       e.target.value = '';
@@ -142,7 +101,6 @@ export default function Admin() {
         const errorMsg = data.error?.message || 'Unknown error';
         setUploadStatus('❌ Upload failed: ' + errorMsg);
         alert('❌ Upload failed: ' + errorMsg);
-        console.error('ImgBB Error:', data);
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -171,32 +129,101 @@ export default function Admin() {
     setIsAuthenticated(false);
     localStorage.removeItem('adminLoggedIn');
     setPassword('');
-    setProperties([]);
   };
 
-  const handleAdd = () => {
+  // ✅ Add property to Supabase
+  const handleAdd = async () => {
     if (!formData.title || !formData.location || !formData.size || !formData.price) {
-      alert('Please fill in all required fields (Title, Location, Size, Price)');
+      alert('Please fill in all required fields');
       return;
     }
-    const newProperty = {
-      id: Date.now(),
-      ...formData
-    };
-    setProperties([...properties, newProperty]);
-    setFormData({
-      title: '',
-      type: 'plot',
-      location: '',
-      size: '',
-      price: '',
-      image: '',
-      description: '',
-      featured: false,
-      available: true,
-      dateAdded: new Date().toISOString().split('T')[0]
-    });
-    setShowForm(false);
+
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .insert([formData])
+        .select();
+
+      if (error) throw error;
+
+      setProperties([data[0], ...properties]);
+      setShowForm(false);
+      setFormData({
+        title: '',
+        type: 'plot',
+        location: '',
+        size: '',
+        price: '',
+        image: '',
+        description: '',
+        featured: false,
+        available: true,
+        dateAdded: new Date().toISOString().split('T')[0]
+      });
+      alert('✅ Property added successfully!');
+    } catch (error) {
+      console.error('Error adding property:', error);
+      alert('❌ Error adding property. Please try again.');
+    }
+  };
+
+  // ✅ Update property in Supabase
+  const handleUpdate = async () => {
+    if (!formData.title || !formData.location || !formData.size || !formData.price) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update(formData)
+        .eq('id', editingId);
+
+      if (error) throw error;
+
+      setProperties(properties.map(p => 
+        p.id === editingId ? { ...formData, id: editingId } : p
+      ));
+      setShowForm(false);
+      setEditingId(null);
+      setFormData({
+        title: '',
+        type: 'plot',
+        location: '',
+        size: '',
+        price: '',
+        image: '',
+        description: '',
+        featured: false,
+        available: true,
+        dateAdded: new Date().toISOString().split('T')[0]
+      });
+      alert('✅ Property updated successfully!');
+    } catch (error) {
+      console.error('Error updating property:', error);
+      alert('❌ Error updating property. Please try again.');
+    }
+  };
+
+  // ✅ Delete property from Supabase
+  const handleDelete = async (id) => {
+    if (!window.confirm('⚠️ Are you sure you want to delete this property?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setProperties(properties.filter(p => p.id !== id));
+      alert('✅ Property deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      alert('❌ Error deleting property. Please try again.');
+    }
   };
 
   const handleEdit = (id) => {
@@ -205,36 +232,6 @@ export default function Admin() {
       setFormData(property);
       setEditingId(id);
       setShowForm(true);
-    }
-  };
-
-  const handleUpdate = () => {
-    if (!formData.title || !formData.location || !formData.size || !formData.price) {
-      alert('Please fill in all required fields (Title, Location, Size, Price)');
-      return;
-    }
-    setProperties(properties.map(p => 
-      p.id === editingId ? { ...formData, id: editingId } : p
-    ));
-    setFormData({
-      title: '',
-      type: 'plot',
-      location: '',
-      size: '',
-      price: '',
-      image: '',
-      description: '',
-      featured: false,
-      available: true,
-      dateAdded: new Date().toISOString().split('T')[0]
-    });
-    setEditingId(null);
-    setShowForm(false);
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm('⚠️ Are you sure you want to delete this property?')) {
-      setProperties(properties.filter(p => p.id !== id));
     }
   };
 
@@ -255,16 +252,21 @@ export default function Admin() {
     URL.revokeObjectURL(url);
   };
 
-  const handleImport = (e) => {
+  const handleImport = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         try {
           const data = JSON.parse(event.target.result);
           if (Array.isArray(data)) {
-            setProperties(data);
-            localStorage.setItem('guptaProperties', JSON.stringify(data));
+            const { error } = await supabase
+              .from('properties')
+              .insert(data);
+            
+            if (error) throw error;
+            
+            await loadProperties();
             alert('✅ Properties imported successfully!');
           } else {
             alert('❌ Invalid format. Please upload a valid properties array.');
@@ -294,7 +296,6 @@ export default function Admin() {
     return colors[type] || '#1e3a5f';
   };
 
-  // Loading state
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -380,10 +381,20 @@ export default function Admin() {
           📤 Import Data
           <input type="file" accept=".json" onChange={handleImport} style={styles.fileInput} />
         </label>
-        <button onClick={() => {
+        <button onClick={async () => {
           if (window.confirm('⚠️ Are you sure you want to delete ALL properties? This cannot be undone!')) {
-            setProperties([]);
-            localStorage.setItem('guptaProperties', JSON.stringify([]));
+            try {
+              const { error } = await supabase
+                .from('properties')
+                .delete()
+                .neq('id', 0);
+              
+              if (error) throw error;
+              await loadProperties();
+              alert('✅ All properties cleared!');
+            } catch (error) {
+              alert('❌ Error clearing properties. Please try again.');
+            }
           }
         }} style={styles.clearBtn}>
           🗑️ Clear All
@@ -652,7 +663,7 @@ export default function Admin() {
       </div>
 
       <div style={styles.footer}>
-        <p>💾 Changes are saved automatically in your browser's local storage.</p>
+        <p>💾 Data is stored securely in Supabase database.</p>
         <p>📌 <strong>Pro Tip:</strong> Use the Export button regularly to backup your data.</p>
       </div>
     </div>
@@ -670,8 +681,6 @@ const styles = {
     color: '#666',
     fontSize: '18px',
   },
-
-  // Login Styles
   loginContainer: {
     display: 'flex',
     justifyContent: 'center',
@@ -746,8 +755,6 @@ const styles = {
     cursor: 'pointer',
     transition: 'background 0.3s',
   },
-
-  // Admin Panel Styles
   adminPanel: {
     maxWidth: '1200px',
     margin: '0 auto',
@@ -1036,8 +1043,6 @@ const styles = {
     color: '#666',
     fontSize: '13px',
   },
-
-  // Image Upload Styles
   imageUploadContainer: {
     display: 'flex',
     flexDirection: 'column',
