@@ -6,10 +6,14 @@ export default function Properties() {
   const [filterType, setFilterType] = useState('all');
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // ✅ Load properties from Supabase
   const loadProperties = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -19,8 +23,87 @@ export default function Properties() {
       setProperties(data || []);
     } catch (error) {
       console.error('Error loading properties:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Add sample properties if table is empty
+  const addSampleProperties = async () => {
+    const sampleProperties = [
+      {
+        title: 'Luxury Villa in Hyderabad',
+        type: 'villa',
+        location: 'Hyderabad',
+        size: '3500 sq ft',
+        price: '₹2.5 Crores',
+        image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400',
+        description: 'Beautiful 4 BHK villa with private pool and garden',
+        featured: true,
+        available: true,
+        dateAdded: new Date().toISOString().split('T')[0]
+      },
+      {
+        title: 'Modern Apartment in Mumbai',
+        type: 'apartment',
+        location: 'Mumbai',
+        size: '1800 sq ft',
+        price: '₹4.5 Crores',
+        image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400',
+        description: 'Spacious 3 BHK with sea view and premium amenities',
+        featured: true,
+        available: true,
+        dateAdded: new Date().toISOString().split('T')[0]
+      },
+      {
+        title: 'Large Agricultural Land',
+        type: 'land',
+        location: 'Bangalore Highway, Kurnool',
+        size: '5 Acres',
+        price: '₹2.8 Crores',
+        image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400',
+        description: 'Large agricultural land with excellent soil quality',
+        featured: false,
+        available: true,
+        dateAdded: '2026-08-18'
+      },
+      {
+        title: 'Penthouse in Delhi',
+        type: 'penthouse',
+        location: 'Delhi',
+        size: '2500 sq ft',
+        price: '₹3.5 Crores',
+        image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400',
+        description: 'Luxurious penthouse with terrace garden and city view',
+        featured: true,
+        available: true,
+        dateAdded: new Date().toISOString().split('T')[0]
+      },
+      {
+        title: 'Commercial Shop in Kurnool',
+        type: 'commercial',
+        location: 'Kurnool',
+        size: '800 sq ft',
+        price: '₹1.2 Crores',
+        image: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=400',
+        description: 'Prime location commercial shop in busy market area',
+        featured: false,
+        available: true,
+        dateAdded: new Date().toISOString().split('T')[0]
+      }
+    ];
+
+    const { data, error } = await supabase
+      .from('properties')
+      .insert(sampleProperties)
+      .select();
+
+    if (error) {
+      alert('Error adding samples: ' + error.message);
+    } else {
+      alert('✅ Sample properties added!');
+      loadProperties();
     }
   };
 
@@ -29,14 +112,12 @@ export default function Properties() {
 
     // ✅ Listen for custom event from Admin
     const handlePropertyUpdate = () => {
-      setLoading(true);
       loadProperties();
     };
 
     // ✅ Listen for localStorage changes
     const handleStorageChange = (e) => {
       if (e.key === 'guptaProperties') {
-        setLoading(true);
         loadProperties();
       }
     };
@@ -51,7 +132,7 @@ export default function Properties() {
   }, []);
 
   // Get unique property types for filter buttons
-  const types = ['all', ...new Set(properties.map(p => p.type))];
+  const types = ['all', ...new Set(properties.map(p => p.type).filter(Boolean))];
   
   // Filter properties
   const filteredProperties = filterType === 'all' 
@@ -65,9 +146,12 @@ export default function Properties() {
       land: '🌾',
       house: '🏠',
       villa: '🏰',
-      commercial: '🏪'
+      apartment: '🏢',
+      commercial: '🏪',
+      penthouse: '🏬',
+      farmhouse: '🌳'
     };
-    return icons[type] || '🏠';
+    return icons[type?.toLowerCase()] || '🏠';
   };
 
   // Get badge color
@@ -77,9 +161,21 @@ export default function Properties() {
       land: '#2ecc71',
       house: '#3498db',
       villa: '#9b59b6',
-      commercial: '#e67e22'
+      apartment: '#e67e22',
+      commercial: '#e74c3c',
+      penthouse: '#8e44ad',
+      farmhouse: '#27ae60'
     };
-    return colors[type] || '#1e3a5f';
+    return colors[type?.toLowerCase()] || '#1e3a5f';
+  };
+
+  // Format price display
+  const formatPrice = (price) => {
+    if (!price) return 'Contact for price';
+    // If price already has ₹ symbol, return as is
+    if (price.includes('₹')) return price;
+    // Add ₹ symbol if missing
+    return `₹${price}`;
   };
 
   // Loading state
@@ -89,9 +185,54 @@ export default function Properties() {
         <div style={styles.sectionContainer}>
           <h2 style={styles.sectionTitle}>Available <span style={styles.goldText}>Properties</span></h2>
           <div style={styles.divider}></div>
-          <p style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
-            Loading properties...
-          </p>
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <div style={{ 
+              width: '50px', 
+              height: '50px', 
+              border: '4px solid #f3f3f3',
+              borderTop: '4px solid #c9a84c',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 20px'
+            }}></div>
+            <p style={{ color: '#666' }}>Loading properties...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section style={styles.propertiesSection}>
+        <div style={styles.sectionContainer}>
+          <h2 style={styles.sectionTitle}>Available <span style={styles.goldText}>Properties</span></h2>
+          <div style={styles.divider}></div>
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px',
+            background: '#fff5f5',
+            borderRadius: '10px',
+            border: '1px solid #fcc'
+          }}>
+            <p style={{ color: '#e74c3c', fontSize: '18px' }}>❌ Error loading properties</p>
+            <p style={{ color: '#666', margin: '10px 0' }}>{error}</p>
+            <button 
+              onClick={loadProperties}
+              style={{
+                padding: '10px 30px',
+                background: '#c9a84c',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </section>
     );
@@ -116,7 +257,7 @@ export default function Properties() {
                 color: filterType === type ? 'white' : '#1e3a5f'
               }}
             >
-              {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
+              {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1) + 's'}
             </button>
           ))}
         </div>
@@ -124,7 +265,28 @@ export default function Properties() {
         {/* Property Cards Grid */}
         <div style={styles.propertiesGrid}>
           {filteredProperties.length === 0 ? (
-            <p style={styles.noProperties}>No properties available in this category</p>
+            <div style={styles.noProperties}>
+              <p style={{ fontSize: '20px', marginBottom: '10px' }}>🏠</p>
+              <p style={{ fontSize: '18px', color: '#666' }}>No properties available in this category</p>
+              {properties.length === 0 && (
+                <button 
+                  onClick={addSampleProperties}
+                  style={{
+                    marginTop: '20px',
+                    padding: '12px 30px',
+                    background: '#c9a84c',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Add Sample Properties
+                </button>
+              )}
+            </div>
           ) : (
             filteredProperties.map(property => (
               <div key={property.id} style={styles.propertyCard}>
@@ -151,15 +313,39 @@ export default function Properties() {
                   <h3 style={styles.propertyTitle}>{property.title}</h3>
                   <p style={styles.propertyLocation}>📍 {property.location}</p>
                   <div style={styles.propertyDetails}>
-                    <span>📏 {property.size}</span>
-                    <span>💰 {property.price}</span>
+                    <span>📏 {property.size || 'N/A'}</span>
+                    <span style={styles.priceTag}>💰 {formatPrice(property.price)}</span>
                   </div>
-                  <p style={styles.propertyDescription}>{property.description}</p>
+                  <p style={styles.propertyDescription}>
+                    {property.description || 'Beautiful property in prime location'}
+                  </p>
                   <div style={styles.propertyFooter}>
-                    <span style={styles.propertyDate}>📅 {property.dateAdded}</span>
-                    <span style={styles.availableBadge}>
+                    <span style={styles.propertyDate}>
+                      📅 {property.dateAdded || new Date().toISOString().split('T')[0]}
+                    </span>
+                    <span style={{
+                      ...styles.availableBadge,
+                      color: property.available ? '#2ecc71' : '#e74c3c'
+                    }}>
                       {property.available ? '✅ Available' : '❌ Sold'}
                     </span>
+                  </div>
+                  {/* Contact Buttons */}
+                  <div style={styles.contactButtons}>
+                    <a 
+                      href="tel:+919393810954"
+                      style={styles.callBtn}
+                    >
+                      📞 Call Now
+                    </a>
+                    <a 
+                      href={`https://wa.me/919393810954?text=Hi, I'm interested in ${property.title}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.whatsappBtn}
+                    >
+                      💬 WhatsApp
+                    </a>
                   </div>
                 </div>
               </div>
@@ -167,6 +353,14 @@ export default function Properties() {
           )}
         </div>
       </div>
+
+      {/* Add animation keyframes */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </section>
   );
 }
@@ -292,6 +486,10 @@ const styles = {
     fontWeight: 'bold',
     color: '#1e3a5f',
   },
+  priceTag: {
+    color: '#c9a84c',
+    fontSize: '16px',
+  },
   propertyDescription: {
     fontSize: '14px',
     color: '#666',
@@ -303,6 +501,7 @@ const styles = {
     justifyContent: 'space-between',
     fontSize: '12px',
     color: '#999',
+    marginBottom: '15px',
   },
   propertyDate: {
     fontSize: '12px',
@@ -310,25 +509,57 @@ const styles = {
   availableBadge: {
     fontSize: '12px',
     fontWeight: 'bold',
-    color: '#2ecc71',
+  },
+  contactButtons: {
+    display: 'flex',
+    gap: '10px',
+  },
+  callBtn: {
+    flex: 1,
+    padding: '10px',
+    background: '#2ecc71',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    transition: 'background 0.3s',
+  },
+  whatsappBtn: {
+    flex: 1,
+    padding: '10px',
+    background: '#25D366',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    transition: 'background 0.3s',
   },
   noProperties: {
     textAlign: 'center',
-    color: '#666',
-    fontSize: '18px',
-    padding: '40px 0',
+    padding: '60px 0',
     gridColumn: '1 / -1',
   },
 };
 
-// Add media queries dynamically
+// Add media queries
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   @media (max-width: 1024px) {
-    .properties-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .properties-grid { 
+      grid-template-columns: repeat(2, 1fr) !important; 
+    }
   }
   @media (max-width: 600px) {
-    .properties-grid { grid-template-columns: 1fr !important; }
+    .properties-grid { 
+      grid-template-columns: 1fr !important; 
+    }
+    .section-title {
+      font-size: 28px !important;
+    }
   }
 `;
 document.head.appendChild(styleSheet);
