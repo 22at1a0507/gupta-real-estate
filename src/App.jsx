@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Properties from './Properties';
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -26,6 +27,7 @@ export default function App() {
             <a href="#home" style={styles.navLink}>Home</a>
             <a href="#about" style={styles.navLink}>About</a>
             <a href="#services" style={styles.navLink}>Services</a>
+            <a href="#properties" style={styles.navLink}>Properties</a>
             <a href="#testimonials" style={styles.navLink}>Testimonials</a>
             <a href="#contact" style={styles.contactNav}>Contact</a>
           </div>
@@ -38,6 +40,7 @@ export default function App() {
             <a href="#home" style={styles.mobileLink}>Home</a>
             <a href="#about" style={styles.mobileLink}>About</a>
             <a href="#services" style={styles.mobileLink}>Services</a>
+            <a href="#properties" style={styles.mobileLink}>Properties</a>
             <a href="#testimonials" style={styles.mobileLink}>Testimonials</a>
             <a href="#contact" style={styles.mobileContact}>Contact</a>
           </div>
@@ -70,7 +73,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* VIDEO CONTAINER - FIXED POSITION */}
+          {/* VIDEO CONTAINER */}
           <div style={styles.heroVideoContainer}>
             <div style={styles.videoBox}>
               <video 
@@ -98,7 +101,6 @@ export default function App() {
           <div style={styles.aboutGrid}>
             <div style={styles.aboutLeft}>
               <div style={styles.avatar}>
-                {/* FIXED PHOTO PATH */}
                 <img 
                   src="/gupta.png" 
                   alt="Mr. A Venkateswarlu Gupta" 
@@ -198,6 +200,9 @@ export default function App() {
         </div>
       </section>
 
+      {/* PROPERTIES SECTION */}
+      <Properties />
+
       {/* TESTIMONIALS */}
       <section id="testimonials" style={styles.testimonialsSection}>
         <div style={styles.sectionContainer}>
@@ -235,7 +240,7 @@ export default function App() {
               <p style={styles.contactItem}>📞 <strong>Phone:</strong> <a href="tel:+919393810954" style={styles.contactLink}>+91 9393810954</a></p>
               <p style={styles.contactItem}>💬 <strong>WhatsApp:</strong> <a href="https://wa.me/919393810954" style={styles.contactLink}>+91 9393810954</a></p>
               <p style={styles.contactItem}>📍 <strong>Office:</strong> H:no 1/216, Madam Ghadikhana, beside post office, one town, Kurnool</p>
-              <p style={styles.contactItem}>🕐 <strong>Business Hours:</strong> Sun – Mon 9:00 AM – 10:00 PM</p>
+              <p style={styles.contactItem}>🕐 <strong>Business Hours:</strong> Mon–Sat 9:00 AM – 10:00 PM</p>
             </div>
             <div style={styles.contactButtons}>
               <a href="tel:+919393810954" style={styles.contactCallBtn}>
@@ -270,6 +275,8 @@ export default function App() {
             <a href="#home" style={styles.footerLink}>Home</a>
             <a href="#about" style={styles.footerLink}>About</a>
             <a href="#services" style={styles.footerLink}>Services</a>
+            <a href="#properties" style={styles.footerLink}>Properties</a>
+            <a href="#testimonials" style={styles.footerLink}>Testimonials</a>
             <a href="#contact" style={styles.footerLink}>Contact</a>
           </div>
           <div style={styles.footerCol}>
@@ -497,7 +504,7 @@ const styles = {
     color: '#555',
   },
 
-  // VIDEO CONTAINER - FIXED
+  // VIDEO CONTAINER
   heroVideoContainer: {
     flex: 1,
     minWidth: '300px',
@@ -508,7 +515,7 @@ const styles = {
   videoBox: {
     position: 'relative',
     width: '100%',
-    paddingBottom: '45%', // Perfect rectangle - shorter height
+    paddingBottom: '45%',
     height: 0,
     overflow: 'hidden',
     borderRadius: '16px',
@@ -573,7 +580,7 @@ const styles = {
     marginBottom: '40px',
   },
 
-  // About Section - FIXED PHOTO
+  // About Section
   aboutSection: {
     padding: '80px 0',
     background: 'white',
@@ -960,6 +967,10 @@ styleSheet.textContent = `
     transform: scale(1.02);
   }
   .service-card:hover, .why-card:hover, .testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  }
+  .property-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
   }
