@@ -22,7 +22,7 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'gupta2026';
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '197324';
 const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
 
 // ADD THIS DEBUG LINE
