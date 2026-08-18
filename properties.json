@@ -1,0 +1,43 @@
+{
+  "properties": [
+    {
+      "id": 1,
+      "type": "plot",
+      "title": "Prime Residential Plot",
+      "location": "Kurnool City Center",
+      "size": "1200 sq.ft",
+      "price": "₹45 Lakhs",
+      "image": "https://via.placeholder.com/400x300?text=Plot+1",
+      "description": "Excellent residential plot in prime location.",
+      "featured": true,
+      "available": true,
+      "dateAdded": "2026-07-20"
+    },
+    {
+      "id": 2,
+      "type": "land",
+      "title": "Agricultural Land",
+      "location": "Nandyal Highway Road",
+      "size": "2 Acres",
+      "price": "₹1.2 Crores",
+      "image": "https://via.placeholder.com/400x300?text=Land+1",
+      "description": "Fertile agricultural land with water supply.",
+      "featured": false,
+      "available": true,
+      "dateAdded": "2026-07-18"
+    },
+    {
+      "id": 3,
+      "type": "house",
+      "title": "Luxury 3BHK Villa",
+      "location": "Hyderabad - Kurnool Main Road",
+      "size": "2500 sq.ft",
+      "price": "₹95 Lakhs",
+      "image": "https://via.placeholder.com/400x300?text=House+1",
+      "description": "Modern 3BHK villa with premium amenities.",
+      "featured": true,
+      "available": true,
+      "dateAdded": "2026-07-15"
+    }
+  ]
+}
