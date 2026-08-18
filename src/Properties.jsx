@@ -1,69 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 export default function Properties() {
   const [filterType, setFilterType] = useState('all');
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load properties from localStorage (same as Admin)
+  // ✅ Load properties from Supabase (NOT localStorage!)
   useEffect(() => {
-    const loadProperties = () => {
-      const saved = localStorage.getItem('guptaProperties');
-      if (saved) {
-        try {
-          setProperties(JSON.parse(saved));
-        } catch (e) {
-          setProperties([]);
-        }
-      } else {
-        // Default properties if none exist
-        const defaults = [
-          {
-            id: 1,
-            type: 'plot',
-            title: 'Prime Residential Plot',
-            location: 'Kurnool City Center',
-            size: '1200 sq.ft',
-            price: '₹45 Lakhs',
-            image: 'https://via.placeholder.com/400x300?text=Plot+1',
-            description: 'Excellent residential plot in prime location.',
-            featured: true,
-            available: true,
-            dateAdded: '2026-07-20'
-          },
-          {
-            id: 2,
-            type: 'land',
-            title: 'Agricultural Land',
-            location: 'Nandyal Highway Road',
-            size: '2 Acres',
-            price: '₹1.2 Crores',
-            image: 'https://via.placeholder.com/400x300?text=Land+1',
-            description: 'Fertile agricultural land with water supply.',
-            featured: false,
-            available: true,
-            dateAdded: '2026-07-18'
-          }
-        ];
-        setProperties(defaults);
-        localStorage.setItem('guptaProperties', JSON.stringify(defaults));
+    const loadProperties = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .order('id', { ascending: false });
+
+        if (error) throw error;
+        setProperties(data || []);
+      } catch (error) {
+        console.error('Error loading properties:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadProperties();
-
-    // Listen for changes in localStorage (when Admin updates)
-    const handleStorageChange = (e) => {
-      if (e.key === 'guptaProperties') {
-        loadProperties();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
   }, []);
 
   // Get unique property types for filter buttons
