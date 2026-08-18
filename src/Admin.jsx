@@ -21,7 +21,8 @@ export default function Admin() {
     dateAdded: new Date().toISOString().split('T')[0]
   });
 
-  const ADMIN_PASSWORD = 'gupta2026';
+  // 🔒 CHANGE THIS PASSWORD - Keep it secret!
+  const ADMIN_PASSWORD = '197324';
 
   // Check if already logged in
   useEffect(() => {
@@ -263,10 +264,6 @@ export default function Admin() {
             <button type="submit" style={styles.loginBtn}>
               🔓 Login to Admin
             </button>
-
-            <p style={styles.loginHint}>
-              💡 Default password: <strong>gupta2026</strong>
-            </p>
           </form>
         </div>
       </div>
@@ -653,12 +650,6 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'background 0.3s',
-  },
-  loginHint: {
-    textAlign: 'center',
-    fontSize: '13px',
-    color: '#999',
-    marginTop: '10px',
   },
 
   // Admin Panel Styles
