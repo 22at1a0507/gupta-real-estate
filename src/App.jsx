@@ -645,7 +645,7 @@ const styles = {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
-    objectPosition: '60% 50%',
+    objectPosition: '70% 50%',
   },
   agentName: {
     fontSize: '24px',
