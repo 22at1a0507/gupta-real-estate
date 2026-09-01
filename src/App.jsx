@@ -113,7 +113,7 @@ function AppContent() {
                   <div style={styles.aboutLeft}>
                     <div style={styles.avatar}>
                       <img 
-                        src="/gupta.png" 
+                        src="C:\Users\DELL\Pictures\WhatsApp Image 2026-09-01 at 3.52.21 PM.jpeg" 
                         alt="Mr. A Venkateswarlu Gupta" 
                         style={styles.avatarImage}
                       />
